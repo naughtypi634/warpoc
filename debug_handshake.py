@@ -84,12 +84,26 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"UDP DNS 1.1.1.1:53 -> FAIL {e}", flush=True)
 
+    # Control 2: QUIC Initial to 1.1.1.1:443 -> expect version negotiation reply
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(6)
+        quic = bytes([0xc0]) + b"\x00" * 19  # short-ish long header probe
+        s.sendto(quic, ("1.1.1.1", 443))
+        data, _ = s.recvfrom(2048)
+        print(f"UDP QUIC 1.1.1.1:443 -> OK {len(data)} bytes first={data[:5].hex()}", flush=True)
+    except Exception as e:
+        print(f"UDP QUIC 1.1.1.1:443 -> FAIL {e}", flush=True)
+
     cfg = configparser.ConfigParser()
     cfg.read("wgcf-profile.conf")
     priv = cfg["Interface"]["PrivateKey"].strip()
     endpoints = [
         "engage.cloudflareclient.com:2408",
         "162.159.192.6:2408",
+        "162.159.192.1:500",
+        "162.159.192.1:1701",
+        "162.159.192.1:4500",
         "162.159.193.218:1387",
         "188.114.97.63:3476",
         "1.1.1.1:2408",
