@@ -1,0 +1,24 @@
+name: WARP Debug Handshake
+
+on:
+  workflow_dispatch:
+
+jobs:
+  handshake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q cryptography
+      - name: Register fresh account
+        env:
+          DEBUG_WGCF_VER: "2.2.32"
+        run: |
+          curl -fsSL "https://github.com/ViRb3/wgcf/releases/download/v${DEBUG_WGCF_VER}/wgcf_${DEBUG_WGCF_VER}_linux_amd64" -o wgcf
+          chmod +x wgcf
+          ./wgcf register --accept-tos
+          ./wgcf generate
+      - name: Test WireGuard handshake
+        run: python debug_handshake.py
