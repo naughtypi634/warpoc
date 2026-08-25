@@ -70,6 +70,20 @@ def handshake(priv_b64, endpoint, timeout=6):
 
 
 if __name__ == "__main__":
+    # Control: UDP DNS query to prove UDP egress works from this machine
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(6)
+        # minimal DNS query for "example.com" A record to 1.1.1.1:53
+        txid = b"\x12\x34"
+        dns = txid + b"\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00"
+        dns += b"\x07example\x03com\x00\x00\x01\x00\x01"
+        s.sendto(dns, ("1.1.1.1", 53))
+        data, _ = s.recvfrom(2048)
+        print(f"UDP DNS 1.1.1.1:53 -> OK {len(data)} bytes", flush=True)
+    except Exception as e:
+        print(f"UDP DNS 1.1.1.1:53 -> FAIL {e}", flush=True)
+
     cfg = configparser.ConfigParser()
     cfg.read("wgcf-profile.conf")
     priv = cfg["Interface"]["PrivateKey"].strip()
