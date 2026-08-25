@@ -1,0 +1,44 @@
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: false
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+  - 223.5.5.5
+  - 119.29.29.29
+  fallback:
+  - 1.1.1.1
+  - 8.8.8.8
+proxies:
+- name: CF-Worker
+  type: vless
+  server: warpoc.naughtypi634.workers.dev
+  port: 443
+  uuid: 456e4adb-cc2e-4237-a160-fbd3ccc0579e
+  network: ws
+  tls: true
+  servername: warpoc.naughtypi634.workers.dev
+  ws-opts:
+    path: /?ed=2048
+    headers:
+      Host: warpoc.naughtypi634.workers.dev
+proxy-groups:
+- name: CF-AUTO
+  type: url-test
+  url: https://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - CF-Worker
+- name: CF
+  type: select
+  proxies:
+  - CF-AUTO
+  - CF-Worker
+rules:
+- GEOIP,CN,DIRECT
+- MATCH,CF
