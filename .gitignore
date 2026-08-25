@@ -1,5 +1,6 @@
 __pycache__/
 profiles/
 *.toml
+!wrangler.toml
 wgcf
 .env
